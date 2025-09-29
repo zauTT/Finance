@@ -5,33 +5,36 @@
 //  Created by Giorgi Zautashvili on 29.09.25.
 //
 
-
 import UIKit
 
 class MainTabBarController: UITabBarController {
     
     override func viewDidLoad() {
-    super.viewDidLoad()
-        
+        super.viewDidLoad()
+
         let homeVC = HomeViewController()
-        let transactionsVC = TransitionViewController()
+        let transactionsVC = TransactionsViewController()
         let summaryVC = SummaryViewController()
-        
+
+        // Titles for navigation bars
         homeVC.title = "Home"
         transactionsVC.title = "Transactions"
-        summaryVC.title = "Summery"
-        
-        self.setViewControllers([
-            UINavigationController(rootViewController: homeVC),
-            UINavigationController(rootViewController: transactionsVC),
-            UINavigationController(rootViewController: summaryVC)
-        ], animated: false)
-        
-        guard let items = tabBar.items else { return }
-        let icons = ["house", "arrow.left.arrow.right", "chart.pie"]
-        
-        for i in 0..<items.count {
-            items[i].image = UIImage(systemName: icons[i])
-        }
+        summaryVC.title = "Summary"
+
+        let homeNav = UINavigationController(rootViewController: homeVC)
+        let transactionsNav = UINavigationController(rootViewController: transactionsVC)
+        let summaryNav = UINavigationController(rootViewController: summaryVC)
+
+        // Explicit tab bar items
+        homeNav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), selectedImage: nil)
+        transactionsNav.tabBarItem = UITabBarItem(title: "Transactions", image: UIImage(systemName: "arrow.left.arrow.right"), selectedImage: nil)
+        summaryNav.tabBarItem = UITabBarItem(title: "Summary", image: UIImage(systemName: "chart.pie"), selectedImage: nil)
+
+        setViewControllers([homeNav, transactionsNav, summaryNav], animated: false)
+
+        // Optional appearance
+        tabBar.tintColor = .label
+        tabBar.unselectedItemTintColor = .secondaryLabel
     }
 }
+
