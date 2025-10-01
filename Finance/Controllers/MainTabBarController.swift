@@ -31,7 +31,7 @@ class MainTabBarController: UITabBarController {
         summaryNav.tabBarItem = UITabBarItem(title: "Summary", image: UIImage(systemName: "chart.pie"), selectedImage: nil)
 
         setViewControllers([homeNav, transactionsNav, summaryNav], animated: false)
-
+        
         // Optional appearance
         tabBar.tintColor = .label
         tabBar.unselectedItemTintColor = .secondaryLabel

@@ -9,4 +9,120 @@ import UIKit
 
 class HomeViewController: ViewController {
     
+    private let viewModel = FinanceViewModel()
+    
+    private let balanceLabel: UILabel = {
+       let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private let tableView: UITableView = {
+        let table = UITableView()
+        table.backgroundColor = .astonMartinRacingGreen
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        table.separatorStyle = .singleLine
+        return table
+    }()
+    
+    private let addButton: UIButton = {
+       let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = 28
+        button.layer.masksToBounds = true
+        return button
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .astonMartinRacingGreen
+        
+        title = "Home"
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: viewModel.isHidden ? "eye.slash" : "eye"),
+            style: .plain,
+            target: self,
+            action: #selector(toggleHidden)
+            )
+        
+        tableView.dataSource = self
+        tableView.delegate = self
+        
+        view.addSubview(balanceLabel)
+        view.addSubview(tableView)
+        view.addSubview(addButton)
+        
+        addButton.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
+        
+        updateUI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        let safe = view.safeAreaInsets
+        balanceLabel.frame = CGRect(x: 20, y: safe.top + 20, width: view.frame.width - 40, height: 50)
+        
+        tableView.frame = CGRect(
+            x: 0,
+            y: balanceLabel.frame.maxY + 10,
+            width: view.frame.width,
+            height: view.frame.height - balanceLabel.frame.maxY - 100
+        )
+        
+        addButton.frame = CGRect(
+            x: view.frame.width - 76,
+            y: view.frame.height - safe.bottom - 76,
+            width: 56,
+            height: 56
+        )
+    }
+    
+    @objc private func toggleHidden() {
+        viewModel.toggleHidden()
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: viewModel.isHidden ? "eye.slash" : "eye")
+        updateUI()
+    }
+    
+    @objc private func didTapAdd() {
+        tabBarController?.selectedIndex = 1
+    }
+    
+    @objc private func updateUI() {
+        if viewModel.isHidden {
+             balanceLabel.text = "•••••"
+         } else {
+             balanceLabel.text = String(format: "$%.2f", viewModel.balance)
+         }
+         tableView.reloadData()
+     }
+}
+
+extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return min(viewModel.transactions.count, 5)
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let transaction = viewModel.transactions[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        
+        let dateString = formatter.string(from: transaction.date)
+        let typeSymbol = transaction.type == .income ? "+" : "-"
+        
+        if viewModel.isHidden {
+            cell.textLabel?.text = "\(transaction.category) ••• (\(dateString))"
+        } else {
+            cell.textLabel?.text = "\(transaction.category) \(typeSymbol)$\(transaction.amount) (\(dateString))"
+        }
+        
+        return cell
+    }
 }
