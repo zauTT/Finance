@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TransactionsViewController: UIViewController {
+class TransactionViewController: UIViewController {
     
     private let viewModel: FinanceViewModel
     
@@ -151,7 +151,7 @@ class TransactionsViewController: UIViewController {
     
 }
 
-extension TransactionsViewController: UITableViewDataSource, UITableViewDelegate {
+extension TransactionViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.transactions.count
     }

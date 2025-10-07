@@ -15,7 +15,7 @@ class MainTabBarController: UITabBarController {
         super.viewDidLoad()
 
         let homeVC = HomeViewController(viewModel: viewModel)
-        let transactionsVC = TransactionsViewController(viewModel: viewModel)
+        let transactionsVC = TransactionViewController(viewModel: viewModel)
         let summaryVC = SummaryViewController(viewModel: viewModel)
 
         // Titles for navigation bars
