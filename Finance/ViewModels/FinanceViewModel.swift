@@ -13,8 +13,24 @@ class FinanceViewModel {
     private let transactionsKey = "transactions"
     private let hiddenKey = "hidden"
     
-    private(set) var transactions: [Transaction] = []
-    private(set) var isHidden: Bool = false
+    var transactions: [Transaction] = [] {
+        didSet {
+            onTransactionsUpdated?()
+        }
+    }
+    
+    var isHidden: Bool = UserDefaults.standard.bool(forKey: "isHidden") {
+        didSet {
+            onVisibilityChanged?(isHidden)
+        }
+    }
+    
+    var onTransactionsUpdated: (() -> Void)?
+    var onVisibilityChanged: ((Bool) -> Void)?
+    
+    var totalBalance: Double {
+        transactions.reduce(0) { $0 + ($1.type == .income ? $1.amount : -$1.amount) }
+    }
     
     var balance: Double {
         let income = transactions.filter { $0.type == .income }.map { $0.amount }.reduce(0, +)
@@ -26,8 +42,8 @@ class FinanceViewModel {
         loadData()
     }
     
-    func addtransaction(_ transaction: Transaction) {
-        transactions.insert(transaction, at: 0)
+    func addTransaction(_ transaction: Transaction) {
+        transactions.append(transaction)
         saveData()
     }
     

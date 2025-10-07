@@ -9,10 +9,19 @@ import UIKit
 
 class HomeViewController: ViewController {
     
-    private let viewModel = FinanceViewModel()
+    private let viewModel: FinanceViewModel
+    
+    init(viewModel: FinanceViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     private let balanceLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
         label.textAlignment = .center
         return label
@@ -21,13 +30,15 @@ class HomeViewController: ViewController {
     private let tableView: UITableView = {
         let table = UITableView()
         table.backgroundColor = .astonMartinRacingGreen
+        table.separatorColor = .white.withAlphaComponent(0.2)
+        table.tableFooterView = UIView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         table.separatorStyle = .singleLine
         return table
     }()
     
     private let addButton: UIButton = {
-       let button = UIButton(type: .system)
+        let button = UIButton(type: .system)
         button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .white
         button.backgroundColor = .systemBlue
@@ -47,7 +58,7 @@ class HomeViewController: ViewController {
             style: .plain,
             target: self,
             action: #selector(toggleHidden)
-            )
+        )
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -56,8 +67,12 @@ class HomeViewController: ViewController {
         view.addSubview(tableView)
         view.addSubview(addButton)
         
+        tableView.backgroundColor = .astonMartinRacingGreen
+        
         addButton.addTarget(self, action: #selector(didTapAdd), for: .touchUpInside)
         
+        setupUI()
+        setupBindings()
         updateUI()
     }
     
@@ -82,6 +97,24 @@ class HomeViewController: ViewController {
         )
     }
     
+    private func setupUI() {
+        tableView.tableFooterView = UIView()
+    }
+    
+    private func setupBindings() {
+        viewModel.onTransactionsUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateUI()
+            }
+        }
+        
+        viewModel.onVisibilityChanged = { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.updateUI()
+            }
+        }
+    }
+    
     @objc private func toggleHidden() {
         viewModel.toggleHidden()
         navigationItem.rightBarButtonItem?.image = UIImage(systemName: viewModel.isHidden ? "eye.slash" : "eye")
@@ -93,13 +126,9 @@ class HomeViewController: ViewController {
     }
     
     @objc private func updateUI() {
-        if viewModel.isHidden {
-             balanceLabel.text = "•••••"
-         } else {
-             balanceLabel.text = String(format: "$%.2f", viewModel.balance)
-         }
-         tableView.reloadData()
-     }
+        balanceLabel.text = viewModel.isHidden ? "••••" : "\(viewModel.totalBalance) ₾"
+        tableView.reloadData()
+    }
 }
 
 extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
@@ -108,7 +137,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let transaction = viewModel.transactions[indexPath.row]
+        let transaction = viewModel.transactions.reversed()[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         
         let formatter = DateFormatter()
@@ -122,6 +151,10 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         } else {
             cell.textLabel?.text = "\(transaction.category) \(typeSymbol)$\(transaction.amount) (\(dateString))"
         }
+        
+        cell.backgroundColor = .astonMartinRacingGreen
+        cell.contentView.backgroundColor = .astonMartinRacingGreen
+        cell.textLabel?.textColor = .white
         
         return cell
     }
