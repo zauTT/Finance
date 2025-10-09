@@ -17,8 +17,7 @@ class MainTabBarController: UITabBarController {
         let homeVC = HomeViewController(viewModel: viewModel)
         let transactionsVC = TransactionViewController(viewModel: viewModel)
         let summaryVC = SummaryViewController(viewModel: viewModel)
-
-        // Titles for navigation bars
+        
         homeVC.title = "Home"
         transactionsVC.title = "Transactions"
         summaryVC.title = "Summary"
@@ -26,15 +25,13 @@ class MainTabBarController: UITabBarController {
         let homeNav = UINavigationController(rootViewController: homeVC)
         let transactionsNav = UINavigationController(rootViewController: transactionsVC)
         let summaryNav = UINavigationController(rootViewController: summaryVC)
-
-        // Explicit tab bar items
+        
         homeNav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), selectedImage: nil)
         transactionsNav.tabBarItem = UITabBarItem(title: "Transactions", image: UIImage(systemName: "arrow.left.arrow.right"), selectedImage: nil)
         summaryNav.tabBarItem = UITabBarItem(title: "Summary", image: UIImage(systemName: "chart.pie"), selectedImage: nil)
 
         setViewControllers([homeNav, transactionsNav, summaryNav], animated: false)
         
-        // Optional appearance
         tabBar.tintColor = .label
         tabBar.unselectedItemTintColor = .secondaryLabel
     }

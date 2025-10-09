@@ -80,6 +80,12 @@ class TransactionViewController: UIViewController {
         }
         
         saveButton.addTarget(self, action: #selector(saveTransaction), for: .touchUpInside)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTapToDismiss))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+        
+        tableView.keyboardDismissMode = .onDrag
     }
     
     override func viewDidLayoutSubviews() {
@@ -147,6 +153,10 @@ class TransactionViewController: UIViewController {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    @objc private func handleTapToDismiss() {
+        view.endEditing(true)
     }
     
 }

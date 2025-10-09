@@ -120,7 +120,7 @@ class HomeViewController: ViewController {
         navigationItem.rightBarButtonItem?.image = UIImage(systemName: viewModel.isHidden ? "eye.slash" : "eye")
         updateUI()
     }
-    
+        
     @objc private func didTapAdd() {
         tabBarController?.selectedIndex = 1
     }
