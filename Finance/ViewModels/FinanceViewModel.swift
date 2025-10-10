@@ -73,10 +73,29 @@ class FinanceViewModel {
         }
         
         isHidden = UserDefaults.standard.bool(forKey: hiddenKey)
+        onTransactionsUpdated?()
     }
     
     private func saveHiddenState() {
         UserDefaults.standard.set(isHidden, forKey: hiddenKey)
     }
     
+    var totalIncome: Double {
+        transactions.filter { $0.type == .income }.map { $0.amount }.reduce(0, +)
+    }
+
+    var totalExpenses: Double {
+        transactions.filter { $0.type == .expense }.map { $0.amount }.reduce(0, +)
+    }
+
+    var categorySummary: [(category: String, total: Double, type: TransactionType)] {
+        var result: [String: (Double, TransactionType)] = [:]
+        
+        for t in transactions {
+            let current = result[t.category]?.0 ?? 0
+            result[t.category] = (current + t.amount, t.type)
+        }
+        
+        return result.map { ($0.key, $0.value.0, $0.value.1) }
+    }
 }

@@ -137,7 +137,7 @@ class TransactionViewController: UIViewController {
             )
         
         viewModel.addTransaction(newTransaction)
-
+        
         amountField.text = ""
         categoryField.text = ""
         noteField.text = ""
