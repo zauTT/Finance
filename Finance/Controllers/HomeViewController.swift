@@ -11,15 +11,6 @@ class HomeViewController: ViewController {
     
     private let viewModel: FinanceViewModel
     
-    init(viewModel: FinanceViewModel) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     private let balanceLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
@@ -46,6 +37,15 @@ class HomeViewController: ViewController {
         button.layer.masksToBounds = true
         return button
     }()
+    
+    init(viewModel: FinanceViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -74,6 +74,13 @@ class HomeViewController: ViewController {
         setupUI()
         setupBindings()
         updateUI()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBalanceVisibilityChanged(_:)), name: .balanceVisibilityChanged, object: nil)
+        
+        if viewModel.isHidden != BalanceVisibility.isHidden {
+            navigationItem.rightBarButtonItem?.image = UIImage(systemName: BalanceVisibility.isHidden ? "eye.slash" : "eye")
+            balanceLabel.text = BalanceVisibility.isHidden ? "••••" : "\(viewModel.totalBalance) ₾"
+        }
     }
     
     override func viewDidLayoutSubviews() {
@@ -115,18 +122,28 @@ class HomeViewController: ViewController {
         }
     }
     
+    @objc private func handleBalanceVisibilityChanged(_ notification: Notification) {
+        let hidden = (notification.userInfo?["isHidden"] as? Bool) ?? BalanceVisibility.isHidden
+        navigationItem.rightBarButtonItem?.image = UIImage(systemName: hidden ? "eye.slash" : "eye")
+        updateUI()
+    }
+    
     @objc private func toggleHidden() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         viewModel.toggleHidden()
+        BalanceVisibility.isHidden = viewModel.isHidden
         navigationItem.rightBarButtonItem?.image = UIImage(systemName: viewModel.isHidden ? "eye.slash" : "eye")
         updateUI()
     }
         
     @objc private func didTapAdd() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         tabBarController?.selectedIndex = 1
     }
     
     @objc private func updateUI() {
-        balanceLabel.text = viewModel.isHidden ? "••••" : "\(viewModel.totalBalance) ₾"
+        let hidden = BalanceVisibility.isHidden
+        balanceLabel.text = hidden ? "••••" : "\(viewModel.totalBalance) ₾"
         tableView.reloadData()
     }
 }
@@ -146,7 +163,7 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         let dateString = formatter.string(from: transaction.date)
         let typeSymbol = transaction.type == .income ? "+" : "-"
         
-        if viewModel.isHidden {
+        if BalanceVisibility.isHidden {
             cell.textLabel?.text = "\(transaction.category) ••• (\(dateString))"
         } else {
             cell.textLabel?.text = "\(transaction.category) \(typeSymbol)$\(transaction.amount) (\(dateString))"
@@ -159,3 +176,4 @@ extension HomeViewController: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
 }
+

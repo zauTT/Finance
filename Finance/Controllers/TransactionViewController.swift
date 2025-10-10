@@ -86,6 +86,8 @@ class TransactionViewController: UIViewController {
         view.addGestureRecognizer(tap)
         
         tableView.keyboardDismissMode = .onDrag
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBalanceVisibilityChanged(_:)), name: .balanceVisibilityChanged, object: nil)
     }
     
     override func viewDidLayoutSubviews() {
@@ -159,6 +161,10 @@ class TransactionViewController: UIViewController {
         view.endEditing(true)
     }
     
+    @objc private func handleBalanceVisibilityChanged(_ notification: Notification) {
+        tableView.reloadData()
+    }
+    
 }
 
 extension TransactionViewController: UITableViewDataSource, UITableViewDelegate {
@@ -176,7 +182,7 @@ extension TransactionViewController: UITableViewDataSource, UITableViewDelegate 
         let dateString = formatter.string(from: transaction.date)
         let sign = transaction.type == .income ? "+" : "-"
         
-        if viewModel.isHidden {
+        if BalanceVisibility.isHidden {
             cell.textLabel?.text = "\(transaction.category) ••• (\(dateString))"
         } else {
             cell.textLabel?.text = "\(transaction.category) \(sign)$\(transaction.amount) (\(dateString))"
@@ -189,4 +195,3 @@ extension TransactionViewController: UITableViewDataSource, UITableViewDelegate 
         return cell
     }
 }
-
